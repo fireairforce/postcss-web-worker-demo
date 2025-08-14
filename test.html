@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostCSS Web Worker 测试</title>
+</head>
+<body>
+    <h1>PostCSS Web Worker 测试</h1>
+    <div id="result"></div>
+    
+    <script>
+        // 测试 PostCSS 是否正确加载
+        const worker = new Worker('./worker.js');
+        
+        worker.onmessage = function(e) {
+            const { type, data, error } = e.data;
+            
+            if (type === 'success') {
+                document.getElementById('result').innerHTML = `
+                    <h2>✅ 测试成功！</h2>
+                    <h3>原始 CSS:</h3>
+                    <pre>${e.data.originalCSS}</pre>
+                    <h3>处理后的 CSS:</h3>
+                    <pre>${data}</pre>
+                `;
+            } else if (type === 'error') {
+                document.getElementById('result').innerHTML = `
+                    <h2>❌ 测试失败</h2>
+                    <p>错误: ${error}</p>
+                `;
+            }
+        };
+        
+        worker.onerror = function(error) {
+            document.getElementById('result').innerHTML = `
+                <h2>❌ Worker 错误</h2>
+                <p>错误: ${error.message}</p>
+            `;
+        };
+        
+        // 发送测试 CSS
+        const testCSS = `
+.example {
+  display: flex;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  border-radius: 8px;
+  padding: 20px;
+  margin: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.example:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+        `;
+        
+        worker.postMessage({
+            type: 'transform',
+            css: testCSS
+        });
+    </script>
+</body>
+</html> 
