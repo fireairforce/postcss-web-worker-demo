@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind CSS 简单测试 - PostCSS Worker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f3f4f6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #3b82f6;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        
+        .content {
+            padding: 24px;
+        }
+        
+        .test-section {
+            margin-bottom: 24px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        
+        .test-section h3 {
+            margin: 0 0 16px 0;
+            color: #374151;
+        }
+        
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .input-group textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        
+        .status.processing {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .status.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+        
+        .result-section {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .quick-tests {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .quick-test {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .quick-test h4 {
+            margin: 0 0 12px 0;
+            color: #374151;
+            font-size: 1rem;
+        }
+        
+        .quick-test-btn {
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .quick-test-btn:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Tailwind CSS 简单测试</h1>
+        </div>
+        
+        <div class="content">
+            <div class="test-section">
+                <h3>输入 Tailwind CSS 类名</h3>
+                
+                <div class="input-group">
+                    <label for="tailwindInput">HTML 代码（包含 Tailwind 类名）：</label>
+                    <textarea id="tailwindInput" placeholder="输入包含 Tailwind CSS 类名的 HTML 代码...">&#x3C;div class=&#x22;bg-blue-500 text-white p-4 rounded-lg&#x22;&#x3E;
+  &#x3C;h2 class=&#x22;text-xl font-bold&#x22;&#x3E;测试标题&#x3C;/h2&#x3E;
+  &#x3C;p class=&#x22;mt-2&#x22;&#x3E;测试内容&#x3C;/p&#x3E;
+&#x3C;/div&gt;</textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button id="transformBtn" class="btn btn-primary">转换 CSS</button>
+                    <button id="clearBtn" class="btn btn-secondary">清空</button>
+                </div>
+                
+                <div id="status" class="status" style="display: none;"></div>
+                
+                <div class="input-group">
+                    <label for="resultOutput">转换结果：</label>
+                    <textarea id="resultOutput" placeholder="转换后的 CSS 将显示在这里..." readonly></textarea>
+                </div>
+            </div>
+            
+            <div class="test-section">
+                <h3>快速测试用例</h3>
+                <div class="quick-tests">
+                    <div class="quick-test">
+                        <h4>基础样式</h4>
+                        <button class="quick-test-btn" onclick="loadTest('basic')">加载</button>
+                    </div>
+                    
+                    <div class="quick-test">
+                        <h4>响应式</h4>
+                        <button class="quick-test-btn" onclick="loadTest('responsive')">加载</button>
+                    </div>
+                    
+                    <div class="quick-test">
+                        <h4>状态变体</h4>
+                        <button class="quick-test-btn" onclick="loadTest('states')">加载</button>
+                    </div>
+                    
+                    <div class="quick-test">
+                        <h4>动画</h4>
+                        <button class="quick-test-btn" onclick="loadTest('animations')">加载</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tailwindInput = document.getElementById('tailwindInput');
+            const transformBtn = document.getElementById('transformBtn');
+            const resultOutput = document.getElementById('resultOutput');
+            const statusDiv = document.getElementById('status');
+            const clearBtn = document.getElementById('clearBtn');
+
+            // 创建 Web Worker
+            const worker = new Worker('./dist/static/js/postcss-transform-web-worker.js');
+
+            // 监听 worker 消息
+            worker.onmessage = function(e) {
+                const { type, data, error } = e.data;
+                
+                if (type === 'success') {
+                    resultOutput.value = data;
+                    showStatus('✅ CSS 转换成功！', 'success');
+                } else if (type === 'error') {
+                    showStatus(`❌ 错误: ${error}`, 'error');
+                }
+            };
+
+            // 监听 worker 错误
+            worker.onerror = function(error) {
+                showStatus(`❌ Worker 错误: ${error.message}`, 'error');
+            };
+
+            // 转换按钮点击事件
+            transformBtn.addEventListener('click', () => {
+                const input = tailwindInput.value.trim();
+                
+                if (!input) {
+                    showStatus('⚠️ 请输入要测试的代码', 'warning');
+                    return;
+                }
+
+                showStatus('⏳ 正在转换中...', 'processing');
+
+                // 发送消息给 worker
+                worker.postMessage({
+                    type: 'transform',
+                    css: input,
+                    options: {
+                        from: 'tailwind-input.css',
+                        to: 'output.css'
+                    }
+                });
+            });
+
+            // 清空按钮事件
+            clearBtn.addEventListener('click', () => {
+                tailwindInput.value = '';
+                resultOutput.value = '';
+                hideStatus();
+            });
+
+            // 显示状态
+            function showStatus(message, type) {
+                statusDiv.textContent = message;
+                statusDiv.className = `status ${type}`;
+                statusDiv.style.display = 'block';
+            }
+
+            // 隐藏状态
+            function hideStatus() {
+                statusDiv.style.display = 'none';
+            }
+
+            // 加载测试用例
+            window.loadTest = function(type) {
+                const testCases = {
+                    basic: `<div class="bg-blue-500 text-white p-4 rounded-lg">
+  <h2 class="text-xl font-bold">基础样式测试</h2>
+  <p class="mt-2">这是一个基础的 Tailwind CSS 测试。</p>
+  <button class="mt-3 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+    基础按钮
+  </button>
+</div>`,
+                    
+                    responsive: `<div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 md:p-6 lg:p-8">
+  <h2 class="text-lg md:text-xl lg:text-2xl font-bold mb-3">响应式设计</h2>
+  <p class="text-sm md:text-base opacity-90">在不同屏幕尺寸下查看效果。</p>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+    <div class="bg-white bg-opacity-20 p-3 rounded">项目 1</div>
+    <div class="bg-white bg-opacity-20 p-3 rounded">项目 2</div>
+  </div>
+</div>`,
+                    
+                    states: `<div class="bg-gray-100 p-4 rounded-lg">
+  <h2 class="text-xl font-bold mb-4 text-gray-800">状态变体测试</h2>
+  <div class="space-y-3">
+    <button class="w-full bg-blue-500 hover:bg-blue-600 focus:bg-blue-700 text-white py-2 px-4 rounded transition-colors">
+      悬停和聚焦效果
+    </button>
+    <input type="text" class="w-full border-2 border-gray-300 focus:border-blue-500 rounded px-3 py-2" placeholder="聚焦我...">
+    <div class="bg-white p-3 rounded border-2 border-transparent hover:border-blue-300 transition-colors cursor-pointer">
+      悬停我
+    </div>
+  </div>
+</div>`,
+                    
+                    animations: `<div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-xl">
+  <h2 class="text-2xl font-bold mb-4 text-center">动画效果测试</h2>
+  <div class="space-y-4">
+    <div class="bg-white bg-opacity-20 p-4 rounded-lg hover:scale-105 transition-transform">
+      <h3 class="text-lg font-semibold mb-2">悬停缩放</h3>
+      <p>悬停时会有缩放效果</p>
+    </div>
+    <div class="bg-white bg-opacity-20 p-4 rounded-lg animate-pulse">
+      <h3 class="text-lg font-semibold mb-2">脉冲动画</h3>
+      <p>持续的脉冲动画效果</p>
+    </div>
+  </div>
+</div>`
+                };
+
+                if (testCases[type]) {
+                    tailwindInput.value = testCases[type];
+                    showStatus(`📚 已加载 ${type} 测试用例`, 'success');
+                }
+            };
+        });
+    </script>
+</body>
+</html> 

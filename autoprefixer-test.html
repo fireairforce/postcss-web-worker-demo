@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoprefixer 测试页面</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #117a8b;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .test-results {
+            margin-top: 20px;
+        }
+        
+        .test-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .category-results {
+            margin-top: 20px;
+        }
+        
+        .category {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .category-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .category-stats {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        
+        .test-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .test-item:last-child {
+            border-bottom: none;
+        }
+        
+        .test-item.success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .test-item.error {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .test-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .test-description {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .test-message {
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .test-message.success {
+            color: #28a745;
+        }
+        
+        .test-message.error {
+            color: #dc3545;
+        }
+        
+        .code-preview {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85em;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Autoprefixer 测试套件</h1>
+            <p>专门用于测试 PostCSS Autoprefixer 功能的完整测试页面</p>
+        </div>
+        
+        <div class="controls">
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="initializeWorker()">
+                    <span class="loading-spinner hidden" id="init-spinner"></span>
+                    初始化 Worker
+                </button>
+                <button class="btn btn-success" onclick="runAllTests()" id="run-tests-btn" disabled>
+                    <span class="loading-spinner hidden" id="test-spinner"></span>
+                    运行所有测试
+                </button>
+                <button class="btn btn-info" onclick="getStatus()">获取状态</button>
+            </div>
+            
+            <div id="status" class="status hidden"></div>
+        </div>
+        
+        <div class="content">
+            <div id="test-results" class="test-results hidden">
+                <div class="test-summary">
+                    <h2>测试结果摘要</h2>
+                    <div id="summary-stats" class="summary-stats"></div>
+                </div>
+                
+                <div id="category-results" class="category-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let worker = null;
+        let isInitialized = false;
+
+        // 初始化 Worker
+        async function initializeWorker() {
+            const initBtn = document.querySelector('button[onclick="initializeWorker()"]');
+            const spinner = document.getElementById('init-spinner');
+            const status = document.getElementById('status');
+            
+            try {
+                initBtn.disabled = true;
+                spinner.classList.remove('hidden');
+                status.className = 'status loading';
+                status.textContent = '正在初始化 PostCSS Worker...';
+                status.classList.remove('hidden');
+                
+                // 创建 Worker
+                worker = new Worker('./worker.js');
+                
+                // 设置消息处理器
+                worker.onmessage = handleWorkerMessage;
+                worker.onerror = handleWorkerError;
+                
+                // 发送初始化消息
+                worker.postMessage({
+                    type: 'init',
+                    data: {
+                        config: {
+                            plugins: {
+                                autoprefixer: {
+                                    overrideBrowserslist: [
+                                        '> 1%',
+                                        'last 2 versions',
+                                        'not dead'
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                showError(`初始化失败: ${error.message}`);
+                initBtn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // 运行所有测试
+        async function runAllTests() {
+            if (!worker || !isInitialized) {
+                showError('请先初始化 Worker');
+                return;
+            }
+            
+            const testBtn = document.getElementById('run-tests-btn');
+            const spinner = document.getElementById('test-spinner');
+            const status = document.getElementById('status');
+            
+            try {
+                testBtn.disabled = true;
+                spinner.classList.remove('hidden');
+                status.className = 'status loading';
+                status.textContent = '正在运行 Autoprefixer 测试...';
+                status.classList.remove('hidden');
+                
+                // 隐藏之前的结果
+                document.getElementById('test-results').classList.add('hidden');
+                
+                // 发送测试消息
+                worker.postMessage({
+                    type: 'test'
+                });
+                
+            } catch (error) {
+                showError(`测试失败: ${error.message}`);
+                testBtn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // 获取状态
+        function getStatus() {
+            if (!worker) {
+                showError('Worker 未初始化');
+                return;
+            }
+            
+            worker.postMessage({
+                type: 'getStatus'
+            });
+        }
+
+        // 处理 Worker 消息
+        function handleWorkerMessage(e) {
+            const { type, data, error, message } = e.data;
+            
+            switch (type) {
+                case 'init_success':
+                    isInitialized = true;
+                    showSuccess(`初始化成功: ${message}`);
+                    document.getElementById('run-tests-btn').disabled = false;
+                    document.querySelector('button[onclick="initializeWorker()"]').disabled = false;
+                    document.getElementById('init-spinner').classList.add('hidden');
+                    break;
+                    
+                case 'init_error':
+                    showError(`初始化失败: ${error}`);
+                    document.querySelector('button[onclick="initializeWorker()"]').disabled = false;
+                    document.getElementById('init-spinner').classList.add('hidden');
+                    break;
+                    
+                case 'test_success':
+                    showSuccess('测试完成！');
+                    document.getElementById('run-tests-btn').disabled = false;
+                    document.getElementById('test-spinner').classList.add('hidden');
+                    displayTestResults(data);
+                    break;
+                    
+                case 'test_error':
+                    showError(`测试失败: ${error}`);
+                    document.getElementById('run-tests-btn').disabled = false;
+                    document.getElementById('test-spinner').classList.add('hidden');
+                    break;
+                    
+                case 'status':
+                    showInfo(`状态: ${JSON.stringify(data, null, 2)}`);
+                    break;
+                    
+                default:
+                    console.log('收到未知消息类型:', type, e.data);
+            }
+        }
+
+        // 处理 Worker 错误
+        function handleWorkerError(error) {
+            showError(`Worker 错误: ${error.message}`);
+            document.querySelector('button[onclick="initializeWorker()"]').disabled = false;
+            document.getElementById('run-tests-btn').disabled = false;
+            document.getElementById('init-spinner').classList.add('hidden');
+            document.getElementById('test-spinner').classList.add('hidden');
+        }
+
+        // 显示测试结果
+        function displayTestResults(data) {
+            const resultsContainer = document.getElementById('test-results');
+            const summaryStats = document.getElementById('summary-stats');
+            const categoryResults = document.getElementById('category-results');
+            
+            // 显示摘要统计
+            summaryStats.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${data.summary.total}</div>
+                    <div class="stat-label">总测试数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #28a745;">${data.summary.passed}</div>
+                    <div class="stat-label">通过</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #dc3545;">${data.summary.failed}</div>
+                    <div class="stat-label">失败</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #007bff;">${data.summary.successRate}%</div>
+                    <div class="stat-label">成功率</div>
+                </div>
+            `;
+            
+            // 显示分类结果
+            categoryResults.innerHTML = '';
+            
+            Object.entries(data.categories).forEach(([category, stats]) => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                
+                const categoryName = getCategoryDisplayName(category);
+                
+                categoryDiv.innerHTML = `
+                    <div class="category-header">
+                        <span>${categoryName}</span>
+                        <span class="category-stats">
+                            ${stats.passed}/${stats.total} 通过 (${((stats.passed/stats.total)*100).toFixed(1)}%)
+                        </span>
+                    </div>
+                `;
+                
+                // 添加该分类的测试项
+                data.details
+                    .filter(test => test.category === category)
+                    .forEach(test => {
+                        const testDiv = document.createElement('div');
+                        testDiv.className = `test-item ${test.success ? 'success' : 'error'}`;
+                        
+                        testDiv.innerHTML = `
+                            <div class="test-name">${test.name}</div>
+                            ${test.description ? `<div class="test-description">${test.description}</div>` : ''}
+                            <div class="test-message ${test.success ? 'success' : 'error'}">
+                                ${test.success ? '✅ ' : '❌ '}${test.message || test.error}
+                            </div>
+                            ${test.validation && test.validation.missingPrefixes.length > 0 ? 
+                                `<div class="test-message error">缺少前缀: ${test.validation.missingPrefixes.join(', ')}</div>` : ''}
+                            ${test.output ? `
+                                <div class="code-preview">
+                                    <strong>输出 CSS:</strong><br>
+                                    ${test.output.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                                </div>
+                            ` : ''}
+                        `;
+                        
+                        categoryDiv.appendChild(testDiv);
+                    });
+                
+                categoryResults.appendChild(categoryDiv);
+            });
+            
+            resultsContainer.classList.remove('hidden');
+        }
+
+        // 获取分类显示名称
+        function getCategoryDisplayName(category) {
+            const names = {
+                'flexbox': '🔧 Flexbox 属性',
+                'transform': '🔄 Transform/Transition',
+                'grid': '📐 Grid 布局',
+                'filter': '🎨 Filter 效果',
+                'user-interaction': '👆 用户交互',
+                'animation': '🎬 动画效果',
+                'modern-css': '✨ 现代 CSS',
+                'complex-structure': '🏗️ 复杂结构',
+                'gradient': '🌈 渐变背景',
+                'border-shadow': '🖼️ 边框阴影',
+                'font-text': '📝 字体文本',
+                'positioning': '📍 定位布局',
+                'basic': '🔰 基础功能'
+            };
+            
+            return names[category] || category;
+        }
+
+        // 显示成功消息
+        function showSuccess(message) {
+            const status = document.getElementById('status');
+            status.className = 'status success';
+            status.textContent = message;
+            status.classList.remove('hidden');
+        }
+
+        // 显示错误消息
+        function showError(message) {
+            const status = document.getElementById('status');
+            status.className = 'status error';
+            status.textContent = message;
+            status.classList.remove('hidden');
+        }
+
+        // 显示信息消息
+        function showInfo(message) {
+            const status = document.getElementById('status');
+            status.className = 'status';
+            status.textContent = message;
+            status.classList.remove('hidden');
+        }
+
+        // 页面加载完成后自动初始化
+        window.addEventListener('load', () => {
+            console.log('Autoprefixer 测试页面已加载');
+        });
+    </script>
+</body>
+</html> 
